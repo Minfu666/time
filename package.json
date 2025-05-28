@@ -1,0 +1,24 @@
+{
+  "name": "tomato-timer",
+  "version": "1.0.0",
+  "description": "番茄钟计时工具桌面应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.4.0"
+  },
+  "build": {
+    "appId": "com.tomato.timer",
+    "productName": "番茄钟计时工具",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.png"
+    }
+  }
+}

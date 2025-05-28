@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟计时工具</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center my-4">
+            <h1>番茄钟计时工具</h1>
+            <p class="lead">提高工作效率，合理安排时间</p>
+            <div id="electron-controls" style="display: none;" class="mt-2">
+                <button id="toggle-pin" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pin"></i> 窗口置顶
+                </button>
+            </div>
+        </header>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card timer-card mb-4">
+                    <div class="card-body text-center">
+                        <div class="timer-mode-selector mb-3">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="timer-mode" id="countdown-mode" checked>
+                                <label class="btn btn-outline-primary" for="countdown-mode">倒计时</label>
+                                
+                                <input type="radio" class="btn-check" name="timer-mode" id="countup-mode">
+                                <label class="btn btn-outline-primary" for="countup-mode">正计时</label>
+                            </div>
+                        </div>
+                        
+                        <!-- 音乐播放器控制 -->
+                        <div class="music-player-controls mb-3">
+                            <button id="toggle-music-player" class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#music-player-container">
+                                <i class="bi bi-music-note-beamed"></i> 背景音乐
+                            </button>
+                        </div>
+                        
+                        <!-- 音乐播放器 -->
+                        <div class="collapse mb-3" id="music-player-container">
+                            <div class="card card-body music-player">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">背景音乐播放器</h6>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="auto-play-music">
+                                        <label class="form-check-label" for="auto-play-music">计时时自动播放</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="music-controls d-flex justify-content-center mb-2">
+                                    <button id="prev-track" class="btn btn-sm btn-outline-secondary mx-1"><i class="bi bi-skip-backward-fill"></i></button>
+                                    <button id="play-music" class="btn btn-sm btn-outline-primary mx-1"><i class="bi bi-play-fill"></i></button>
+                                    <button id="pause-music" class="btn btn-sm btn-outline-warning mx-1"><i class="bi bi-pause-fill"></i></button>
+                                    <button id="next-track" class="btn btn-sm btn-outline-secondary mx-1"><i class="bi bi-skip-forward-fill"></i></button>
+                                </div>
+                                
+                                <div class="volume-control d-flex align-items-center mb-2">
+                                    <i class="bi bi-volume-down"></i>
+                                    <input type="range" class="form-range mx-2" id="volume-slider" min="0" max="100" value="50">
+                                    <i class="bi bi-volume-up"></i>
+                                </div>
+                                
+                                <div class="now-playing text-center mb-2">
+                                    <small id="current-track-name">未选择音乐</small>
+                                </div>
+                                
+                                <div class="d-flex">
+                                    <input type="file" class="form-control form-control-sm me-2" id="music-file-input" accept="audio/*">
+                                    <button id="add-music" class="btn btn-sm btn-outline-success">添加</button>
+                                </div>
+                                
+                                <div class="playlist mt-2">
+                                    <select id="music-playlist" class="form-select form-select-sm" size="3">
+                                        <!-- 播放列表将在这里动态生成 -->
+                                    </select>
+                                    <button id="remove-track" class="btn btn-sm btn-outline-danger mt-1">删除所选</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="countdown-settings" class="mb-3">
+                            <div class="row g-2 justify-content-center">
+                                <div class="col-auto">
+                                    <select id="preset-times" class="form-select">
+                                        <option value="1500">25分钟 (番茄工作)</option>
+                                        <option value="300">5分钟 (短休息)</option>
+                                        <option value="900">15分钟 (长休息)</option>
+                                        <option value="custom">自定义</option>
+                                    </select>
+                                </div>
+                                <div class="col-auto" id="custom-time-container" style="display: none;">
+                                    <input type="number" id="custom-minutes" class="form-control" min="1" max="180" value="25" placeholder="分钟">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timer-display">
+                            <span id="minutes">25</span>:<span id="seconds">00</span>
+                        </div>
+
+                        <div class="task-input mb-3">
+                            <input type="text" id="task-name" class="form-control" placeholder="输入任务名称（可选）">
+                        </div>
+
+                        <div class="timer-controls">
+                            <button id="start-btn" class="btn btn-primary btn-lg">开始</button>
+                            <button id="pause-btn" class="btn btn-warning btn-lg" disabled>暂停</button>
+                            <button id="reset-btn" class="btn btn-danger btn-lg">重置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card history-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">计时历史记录</h5>
+                        <button id="clear-history" class="btn btn-sm btn-outline-danger">清除历史</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="history-container" class="list-group list-group-flush">
+                            <!-- 历史记录将在这里动态生成 -->
+                        </div>
+                        <div id="empty-history" class="text-center text-muted py-3">
+                            <p>暂无计时记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音频提示 -->
+    <audio id="timer-complete-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+
+    <!-- 添加Bootstrap的JavaScript库 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/music.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Node
+node_modules/
+.DS_Store
+*.log
+npm-debug.log*
+# VSCode
+.vscode/
+# Mac
+*.DS_Store
+# Windows
+Thumbs.db
+# 其他常见忽略
+*.swp
+*.swo
+.idea/
+# 本地音乐缓存
+music_cache/
