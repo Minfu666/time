@@ -1,3 +1,6 @@
+const { ipcRenderer } = require('electron');
+const path = require('path');
+
 /**
  * 应用主逻辑
  */
@@ -211,14 +214,22 @@ document.addEventListener('DOMContentLoaded', () => {
     addMusicBtn.addEventListener('click', () => {
         const file = musicFileInput.files[0];
         if (file) {
-            const fileURL = URL.createObjectURL(file);
-            const track = {
-                name: file.name,
-                url: fileURL
+            const reader = new FileReader();
+            reader.onload = () => {
+                const fileData = {
+                    name: file.name,
+                    data: Array.from(new Uint8Array(reader.result))
+                };
+                const filePath = ipcRenderer.sendSync('save-music-file', fileData);
+                const track = {
+                    name: file.name,
+                    url: path.toNamespacedPath(filePath) // 使用path.toNamespacedPath处理路径
+                };
+                musicPlayer.addTrack(track);
+                updatePlaylistUI();
+                musicFileInput.value = '';
             };
-            musicPlayer.addTrack(track);
-            updatePlaylistUI();
-            musicFileInput.value = '';
+            reader.readAsArrayBuffer(file);
         }
     });
     

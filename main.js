@@ -10,6 +10,7 @@ function createWindow() {
     width: 800,
     height: 700,
     icon: path.join(__dirname, 'icon.png'),
+    alwaysOnTop: true, // 默认置顶
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -87,9 +88,22 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow();
 });
 
+const fs = require('fs');
+
 // 添加IPC通信，处理渲染进程发来的消息
-ipcMain.on('toggle-always-on-top', () => {
+ipcMain.on('toggle-always-on-top', (event) => {
   const isAlwaysOnTop = mainWindow.isAlwaysOnTop();
   mainWindow.setAlwaysOnTop(!isAlwaysOnTop);
-  return !isAlwaysOnTop;
+  event.returnValue = !isAlwaysOnTop;
+});
+
+ipcMain.on('save-music-file', (event, fileData) => {
+  const userDataPath = app.getPath('userData');
+  const musicCachePath = path.join(userDataPath, 'music_cache');
+  if (!fs.existsSync(musicCachePath)) {
+    fs.mkdirSync(musicCachePath, { recursive: true });
+  }
+  const filePath = path.join(musicCachePath, fileData.name);
+  fs.writeFileSync(filePath, Buffer.from(fileData.data));
+  event.returnValue = filePath;
 });

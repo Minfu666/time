@@ -1,3 +1,5 @@
+const path = require('path');
+
 /**
  * 背景音乐播放器逻辑
  */
@@ -19,7 +21,10 @@ class MusicPlayer {
     loadPlaylist() {
         const savedPlaylist = localStorage.getItem('music_playlist');
         if (savedPlaylist) {
-            this.playlist = JSON.parse(savedPlaylist);
+            this.playlist = JSON.parse(savedPlaylist).map(track => ({
+                name: track.name,
+                url: path.toNamespacedPath(track.url) // 确保路径格式正确
+            }));
         }
     }
     
